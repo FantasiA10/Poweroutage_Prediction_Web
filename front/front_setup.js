@@ -1,3 +1,4 @@
+//run by node.js
 function mod_simplemaps_usmap_mapdata(state, power_outage){
     for(var key in simplemaps_usmap_mapdata.state_specific){
         if (simplemaps_usmap_mapdata.state_specific[key].name == state){
@@ -15,16 +16,6 @@ function mod_simplemaps_usmap_mapdata(state, power_outage){
     }
 }
 
-function read_txt(txtfile){
-    c
-    for(var i=0;i<arr.length;i++){
-        var temp = arr.split('/');
-        var outage_dict = {};
-        outage_dict[temp[0]] = parseInt(temp[1]);
-    }
-    return outage_dict;
-}
-
 function home_map_upadate(txtfile){
     for(var key in simplemaps_usmap_mapdata.state_specific){
         simplemaps_usmap_mapdata.state_specific[key].description = "default";
@@ -36,4 +27,26 @@ function home_map_upadate(txtfile){
         mod_simplemaps_usmap_mapdata(state, outage_dict[state])
     }
 }
+
+//connect to local MySQL database 
+//modified database connection imformation
+let mysql = require("mysql");
+let connection = mysql.createConnection({
+    host: "localhost",
+    user:"root",
+    password:"",
+    database: "power_outage"
+})
+
+connection.connect((err) => {
+    if(err){
+        console.error("fail to connect database:" + err.stack);
+        return;
+    }
+    console.log("connect database success");
+});
+
+
+connection.end();
+
 
