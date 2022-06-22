@@ -10,7 +10,7 @@ var simplemaps_usmap_mapdata={
 		state_description: "Power Outage:",
     state_color: "#88A4BC",
     state_hover_color: "#3B729F",
-    state_url: "https://simplemaps.com",
+    state_url: "http://127.0.0.1:5500/front/home.html",
     border_size: 1.5,
     border_color: "#ffffff",
     all_states_inactive: "no",

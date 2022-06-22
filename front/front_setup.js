@@ -46,6 +46,13 @@ connection.connect((err) => {
     console.log("connect database success");
 });
 
+connection.query("select * from student", (err, result) => {
+    if(err){
+        console.error("Query error!" + err.message);
+        return;
+    }
+    console.log(result);
+})
 
 connection.end();
 
