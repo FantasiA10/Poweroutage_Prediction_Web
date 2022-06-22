@@ -17,7 +17,6 @@ def readshp(file, outtxtloc):
             fielddefn.GetFieldTypeName(fielddefn.GetType())))
     outtxtfile = open(outtxtloc,'w')
     print(outtxtfile)
-    outtxtfile.write('1')
     feature = layer.GetNextFeature() 
     while feature:
         name = feature.GetFieldAsString('NAME')

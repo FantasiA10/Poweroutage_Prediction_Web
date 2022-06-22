@@ -1,4 +1,3 @@
-<script type="text/javascript" src="mapdata.js"></script>
 function mod_simplemaps_usmap_mapdata(state, power_outage){
     for(var key in simplemaps_usmap_mapdata.state_specific){
         if (simplemaps_usmap_mapdata.state_specific[key].name == state){
@@ -17,22 +16,24 @@ function mod_simplemaps_usmap_mapdata(state, power_outage){
 }
 
 function read_txt(txtfile){
-    var arr=GetHeader(txtfile).split("\n");
+    c
     for(var i=0;i<arr.length;i++){
         var temp = arr.split('/');
         var outage_dict = {};
-        outage_dist[temp[0]] = temp[1];
+        outage_dict[temp[0]] = parseInt(temp[1]);
     }
     return outage_dict;
 }
 
 function home_map_upadate(txtfile){
+    for(var key in simplemaps_usmap_mapdata.state_specific){
+        simplemaps_usmap_mapdata.state_specific[key].description = "default";
+        simplemaps_usmap_mapdata.state_specific[key].color = "default";
+        simplemaps_usmap_mapdata.state_specific[key].hover_color = "default";
+    }
     outage_dict = read_txt(txtfile)
     for(state in outage_dict){
         mod_simplemaps_usmap_mapdata(state, outage_dict[state])
     }
 }
-
-console.log(5);
-read_shapefile('US_States.shp')
 
