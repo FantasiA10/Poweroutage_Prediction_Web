@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/FantasiA10/Poweroutage_Prediction_Web#readme",
   "dependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "shpjs": "^4.0.2"
   }
 }
