@@ -50,10 +50,8 @@ def shp_to_db(file):
     db.close()
     ds.Destroy()
 
-#todo
 def shp_to_GeoJson(shpfile, geojsonfile):
-
-# read the shapefile
+    # read the shapefile
     reader = shapefile.Reader(shpfile)
     fields = reader.fields[1:]
     field_names = [field[0] for field in fields]
@@ -65,11 +63,21 @@ def shp_to_GeoJson(shpfile, geojsonfile):
         geometry=geom, properties=atr)) 
    
     # write the GeoJSON file
-   
     geojson = open(geojsonfile, "w")
     geojson.write(dumps({"type": "FeatureCollection", "features": buffer}, indent=2) + "\n")
     geojson.close()
     print("successfully convert shapefile to geojson")
 
-shp_to_GeoJson("backend/tl_2021_36_cousub.zip", "tl_2021_36_cousub.json")
+def main():
+    path = "shapefile/state_default_shp"
+    files = os.listdir(path)
+    #shp_to_GeoJson("shapefile/state_default_shp/US_States.zip", "shapefile/state_json/US.json")
+    for filename in files:
+        shp_path = "shapefile/state_default_shp/" + filename
+        json_path = "shapefile/state_json/" + filename[8:10] + ".js"
+        print(shp_path, json_path)
+        shp_to_GeoJson(shp_path, json_path)
+
+main()
+#shp_to_GeoJson("shapefile//tl_2021_36_cousub.zip", "backend/tl_2021_36_cousub.json")
 
