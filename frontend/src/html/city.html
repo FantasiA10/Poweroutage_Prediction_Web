@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<style>
+    @import url(city_style.css);
+    @import url(form.css);
+</style>
+
+<html lang="en">
+      <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+      </head>
+    
+      <body>
+        <div class="container">
+			<header>
+				<h1>Disaster Analysis Lab && power outage prediction</h1>
+			</header>
+		</div>
+        <section class="mainbox">
+			<div class="mapbase">
+                <script src = "state_data"></script>
+                <script src = "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+                <script src = "https://cdn.jsdelivr.net/npm/echarts@5.3.3/dist/echarts.js"></script>
+                <script>
+                    var loc=location.href;
+                    var length = loc.length;
+                    window.st_num = decodeURI(loc.substring(loc.indexOf('=') + 1, length));
+                    window.latitude = 32.707;
+                    window.longtitude = -86.693;
+                    window.statename = '';
+                    var state = getstate();
+                    for (elem of state['features']){
+                        if (elem['properties']['STATEFP'] == st_num){
+                            latitude = elem['properties']["INTPTLAT"]
+                            longtitude = elem['properties']["INTPTLON"]
+                            statename = elem['properties']["NAME"]
+                        }
+                    }
+                    document.write('<h3>'+statename+'</h3>');
+                    function highlightFeature(e) {
+                                var layer = e.target;
+
+                                layer.setStyle({
+                                    weight: 5,
+                                    color: '#666',
+                                    dashArray: '',
+                                    fillOpacity: 0.7
+                                });
+
+                                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                                    layer.bringToFront();
+                                }
+                                info.update(layer.feature.properties);
+                            };
+
+                    function resetHighlight(e) {
+                        geojson.resetStyle(e.target);
+                        info.update();
+                    };
+
+                    function sort_object(obj) {
+                        items = Object.keys(obj).map(function(key) {
+                            return [key, obj[key]];
+                        });
+                        items.sort(function(first, second) {
+                            return second[1] - first[1];
+                        });
+                        sorted_obj={}
+                        $.each(items, function(k, v) {
+                            use_key = v[0]
+                            use_value = v[1]
+                            sorted_obj[use_key] = use_value
+                        })
+                        return(sorted_obj)
+                    } 
+
+                    var citydata = fetch('city_data?FP=' + st_num, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/x-www-form-urlencoded'
+                    },
+                    //body: new URLSearchParams(data),
+                    }).then(result=>result.json());
+                    var cityoutage = fetch('city_outage?FP=' + st_num, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/x-www-form-urlencoded'
+                    },
+                    //body: new URLSearchParams(data),
+                    }).then(result=>result.json());
+
+                    Promise.all([citydata, cityoutage]).then(((res)=>{
+                            city_info = res[0]
+                            city_outage = res[1]
+                            outage_dict = {}
+                            for (const element in city_outage){
+                                outage_dict[city_outage[element].cousubfp.toString()] = city_outage[element].outage
+                            }   
+                            function style(feature) {
+                                return {
+                                fillColor: getColor(outage_dict[feature.properties.COUSUBFP]),
+                                weight: 2,
+                                opacity: 1,
+                                color: 'white',
+                                dashArray: '3',
+                                fillOpacity: 0.7
+                                };
+                            }                    
+                            window.geojson;
+                            geojson = L.geoJson(city_info, {style: style, onEachFeature: onEachFeature}).addTo(map);
+                            window.info = L.control();
+                            info.onAdd = function (map) {
+                                this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                                this.update();
+                                return this._div;
+                            };
+                            // method that we will use to update the control based on feature properties passed
+                            info.update = function (props, outage = outage_dict) {
+                                this._div.innerHTML = '<h4>Power Outage:</h4>' +  (props ?
+                                    '<b>' + props.NAME + '</b><br />' + 'Ratio: ' + outage[props.COUSUBFP]
+                                    : 'Select a city');
+                            };
+                            info.addTo(map);
+
+                            var legend = L.control({position: 'bottomright'});
+                            legend.onAdd = function (map) {
+                                var div = L.DomUtil.create('div', 'info legend'),
+                                    grades = [0, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90, 1],
+                                    labels = [];
+                                // loop through our density intervals and generate a label with a colored square for each interval
+                                for (var i = 0; i < grades.length; i++) {
+                                    div.innerHTML +=
+                                        '<i style="background:' + getColor(grades[i] + 0.001) + '"></i> ' +
+                                        grades[i]*100 + '%'; //(grades[i + 0.001] ? '&ndash;' + grades[i + 0.001] + '<br>' : '+');
+                                }
+                                return div;
+                            };
+                            legend.addTo(map);
+                    })).catch((err) => {
+                        console.log(err)
+                    }); // connection errors
+                    outage_dict = {name:'brooklyn'}
+                </script>
+                <div id="map">
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
+                    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+                    <script src = "city_setup.js"></script>
+                </div>
+            </div></section>
+
+
+            <section class="mainbox">
+                <br><h2>#todo words of introduction and backgroud</h2>
+                <br><br>
+                <form><div id = "main"></div>
+                    <br><br>
+                    <div class="filter">
+                    </div>
+                    <table >
+                    <thead>
+                    <tr>                  
+                    <th>#</th>                   
+                    <th>city</th>                   
+                    <th>ratio</th>  
+                    <th>#</th>                   
+                    <th>city</th>                   
+                    <th>ratio</th>                               
+                    </tr>   
+                    </thead>
+                    <tbody id="tbMain"></tbody> 
+                    </table>
+                </form>
+                <br><br>
+        </section>
+    </body>
+
+    <section id="footer">
+        <div class="footerword">
+            <br>
+            <h1>Disaster Analysis Lab</h1>
+            <h2>Power Outage Prediction</h2>
+            <h3><br><br>Contact</h3>
+            <p>Prateek Arora, <a href="pa2178@.edu">pa2178@nyu.edu</a>, Follow on <a
+                    href="https://github.com/pa56" target="_blank">GitHub</a></p>
+            <p>Yishi Wang, <a href="yw4177@.edu">yw4177@nyu.edu</a>, Follow on <a
+                    href="https://github.com/FantasiA10" target="_blank">GitHub</a></p>
+            <h3><br><br>View on GitHub</h3>
+            <p><a href="https://github.com/FantasiA10/Poweroutage_Prediction_Web" target="_blank"><span><svg class="github"
+                            fill="800080" viewBox="0 0 1024 1024" version="1.1" height="24" width="24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path class="svgpath" data-index="path_0" fill="800080"
+                                d="M0 525.2c0 223.6 143.3 413.7 343 483.5 26.9 6.8 22.8-12.4 22.8-25.4l0-88.7c-155.3 18.2-161.5-84.6-172-101.7-21.1-36-70.8-45.2-56-62.3 35.4-18.2 71.4 4.6 113.1 66.3 30.2 44.7 89.1 37.2 119 29.7 6.5-26.9 20.5-50.9 39.7-69.6C248.8 728.2 181.7 630 181.7 513.2c0-56.6 18.7-108.7 55.3-150.7-23.3-69.3 2.2-128.5 5.6-137.3 66.5-6 135.5 47.6 140.9 51.8 37.8-10.2 80.9-15.6 129.1-15.6 48.5 0 91.8 5.6 129.8 15.9 12.9-9.8 77-55.8 138.8-50.2 3.3 8.8 28.2 66.7 6.3 135 37.1 42.1 56 94.6 56 151.4 0 117-67.5 215.3-228.8 243.7 26.9 26.6 43.6 63.4 43.6 104.2l0 128.8c0.9 10.3 0 20.5 17.2 20.5C878.1 942.4 1024 750.9 1024 525.3c0-282.9-229.3-512-512-512C229.1 13.2 0 242.3 0 525.2L0 525.2z" />
+                        </svg>
+                    </span></a></p>
+            <h3><br><br>Data Sources</h3>
+            <p style="font-weight: 200;">
+                <a
+                    href="https://www2.census.gov/geo/tiger/TIGER2021/COUSUB/">https://www2.census.gov/geo/tiger/TIGER2021/COUSUB/</a>, City data from United States Census Bureau
+                <br>
+        </div>
+    </section>
+</html>
+
+
+<script>
+    
+    //todo implement data
+    cityoutage.then(city_outage => {
+        outage_dict = {}
+        outage_arrange  = []
+        for (element of city_outage){
+            outage_dict[element.name] = element.outage;
+            outage_arrange.push([element.outage, element.name])
+        }  
+        top_5 = outage_arrange.sort().reverse().slice(0,5)
+        $(document).ready(function(){
+            var chartDom = document.getElementById('main');
+            var resizeMainContainer = function () {
+                chartDom.style.width = window.innerWidth*0.5+'px';
+                chartDom.style.height = window.innerHeight*0.5+'px';
+            };
+            //设置div容器高宽
+            resizeMainContainer();
+            // 初始化图表
+            var mainChart = echarts.init(chartDom, 'dark');
+            $(window).on('resize',function(){//
+                //屏幕大小自适应，重置容器高宽
+                resizeMainContainer();
+                mainChart.resize();
+            });
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            option = {
+            backgroundColor: '#555',
+            title: {
+                text: 'Power Outage Rank'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                type: 'shadow'
+                }
+            },
+            legend: {},
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: [top_5[0][1], top_5[1][1], top_5[2][1], top_5[3][1], top_5[4][1]].reverse()
+            },
+            series: [
+                {
+                name: 'Outage Top 5',
+                type: 'bar',
+                data: [top_5[0][0], top_5[1][0], top_5[2][0], top_5[3][0], top_5[4][0]].reverse()
+                }
+            ]
+            };
+            option && myChart.setOption(option);
+        })
+        //form header
+        var tbody = document.getElementById('tbMain');
+	    for(var i = 0;i < city_outage.length; i+=2){ 
+            if (i+1 < city_outage.length){
+                var trow = getDataRow(i,city_outage[i],city_outage[i+1]);
+	  	        tbody.appendChild(trow);
+		    }
+		    else{
+                var trow = getDataRow(i,city_outage[i]);
+	  	        tbody.appendChild(trow);
+            }
+		}
+    })
+	  
+    function getDataRow(counter,h1,h2 = null){
+        var row = document.createElement('tr'); 
+        
+        var idCell = document.createElement('td'); 
+        idCell.innerHTML = counter + 1; 
+        row.appendChild(idCell); 
+        
+        var nameCell = document.createElement('td');
+        nameCell.innerHTML = h1.name;
+        row.appendChild(nameCell);
+        
+        var jobCell = document.createElement('td');
+        jobCell.innerHTML = parseFloat(h1.outage*100).toFixed(1) + '%';
+        row.appendChild(jobCell);
+        if (h2!=null){
+            var idCell = document.createElement('td'); 
+            idCell.innerHTML = counter + 2; 
+            row.appendChild(idCell); 
+            
+            var nameCell = document.createElement('td');
+            nameCell.innerHTML = h2.name;
+            row.appendChild(nameCell);
+            
+            var jobCell = document.createElement('td');
+            jobCell.innerHTML = parseFloat(h2.outage*100).toFixed(1) + '%';
+            row.appendChild(jobCell);
+        }
+        else{
+            var idCell = document.createElement('td'); 
+            idCell.innerHTML = counter + 2; 
+            row.appendChild(idCell); 
+            
+            var nameCell = document.createElement('td');
+            nameCell.innerHTML = '-';
+            row.appendChild(nameCell);
+            
+            var jobCell = document.createElement('td');
+            jobCell.innerHTML = '-';
+            row.appendChild(jobCell);
+        }
+        return row;
+    }
+</script>

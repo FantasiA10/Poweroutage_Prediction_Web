@@ -12,13 +12,17 @@ h1{
     color: white;
     font-family: 'Kdam Thmor Pro', sans-serif;
     font-size: 20px;
+    display: flex
 }
 
 h2{
+    margin-top: 1%;
     color: white;
     font-family: 'Kdam Thmor Pro', sans-serif;
-    font-size: 0.4rem;
+    text-align: left;
+    font-size: 20px;
 }
+
 h3{
     font-family: Arial;
 }
@@ -54,7 +58,7 @@ header {
     position:absolute;
     top:1rem;
     left:3rem;
-    height:1000px;
+    height:1500px;
     width: 18rem;
     flex-grow: 1;
     overflow: auto;
@@ -68,7 +72,7 @@ header {
     min-width:1024px;
     max-width:1920px;
     top:4rem;
-    height:1000px;
+    height:1500px;
     margin:0 auto;
     background-color: rgb(67, 66, 66);
     padding: 3rem 3rem 0;
@@ -77,6 +81,10 @@ header {
 .legend{
     position:absolute;
     left:2rem;
+}
+
+#map {
+    background:rgb(67, 66, 66);
 }
 
 
