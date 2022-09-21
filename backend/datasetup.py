@@ -1,13 +1,14 @@
 #coding=utf-8
 #from osgeo import ogr
-import os,sys
-import pymysql
 #import shapefile
+#import pandas as pd
+import os
+import pymysql
 import json
 from json import dumps
-#import pandas as pd
 import csv
 
+#database setup for local host
 db = pymysql.connect(
          host='localhost',
          port=3306,
@@ -16,9 +17,9 @@ db = pymysql.connect(
          db ='power_outage',
          charset='utf8'
          )
-
 cur = db.cursor()
-#read shapefile out put result to database
+
+#read shapefile out put result to cvs file
 def json_to_csv(file):
     with open(file, 'r') as f:
         try:
@@ -40,38 +41,7 @@ def json_to_csv(file):
     f.close()
     return city_info_lst, header
 
-def shp_to_db(file):
-    ds = ogr.Open(file,0)
-    try:
-        ds != None
-    except ValueError:
-        print("file not found!")
-    #modify hosts
-    layer = ds.GetLayer()
-    featuredefn = layer.GetLayerDefn()
-    fieldcount = featuredefn.GetFieldCount()
-    for attr in range(fieldcount):
-        fielddefn = featuredefn.GetFieldDefn(attr)
-        print("%s:  %s"%(\
-            fielddefn.GetNameRef(),\
-            fielddefn.GetFieldTypeName(fielddefn.GetType())))
-    feature = layer.GetNextFeature() 
-    while feature:
-        name = feature.GetFieldAsString('NAME')
-        outage = feature.GetFieldAsString('OUTAGE')
-        #insert data into db
-        sql = "insert"
-        try:
-            cur.execute(sql)
-            db.commit()
-        except:
-            db.rollback()
-        cur.fetchone()
-        feature.Destroy()
-        feature = layer.GetNextFeature()
-    db.close()
-    ds.Destroy()
-
+#shape file imformation to geojson formatting
 def shp_to_GeoJson(shpfile, geojsonfile):
     # read the shapefile
     reader = shapefile.Reader(shpfile)
@@ -83,13 +53,12 @@ def shp_to_GeoJson(shpfile, geojsonfile):
         geom = sr.shape.__geo_interface__
         buffer.append(dict(type="Feature", \
         geometry=geom, properties=atr)) 
-   
-    # write the GeoJSON file
     geojson = open(geojsonfile, "w")
     geojson.write(dumps({"type": "FeatureCollection", "features": buffer}, indent=2) + "\n")
     geojson.close()
     print("successfully convert shapefile to geojson")
 
+#transfer all shapefiles to jsons in folder
 def main_shpfile_to_json():
     path = "shapefile/state_default_shp"
     files = os.listdir(path)
@@ -100,7 +69,8 @@ def main_shpfile_to_json():
         print(shp_path, json_path)
         shp_to_GeoJson(shp_path, json_path)
 
-def lst_to_csv():
+#transfer all json file to cvs in folder
+def folder_json_to_csv():
     path = "C:/Users/15801/Desktop/Poweroutage_Prediction_Web/shapefile/state_json"
     files = os.listdir(path)
     size = 19
@@ -120,6 +90,7 @@ def lst_to_csv():
     dataframe.to_csv("city_info.csv",index=False,sep=',')
     return city_info_lst, header
 
+#create database table from given cvs file
 def load_csv(csv_file_path,table_name,database='power_outage'):
     file = open(csv_file_path, 'r',encoding='utf-8')
     reader = file.readline()
@@ -128,6 +99,7 @@ def load_csv(csv_file_path,table_name,database='power_outage'):
     for a in b:
         colum = colum + a + ' varchar(255),'
     colum = colum[:-1]
+    #insert headers into databse
     create_sql = 'create table if not exists ' + table_name + ' ' + '(' + colum + ')' + ' DEFAULT CHARSET=utf8'
     cur.execute('use %s' % database)
     cur.execute('SET NAMES utf8;')
@@ -138,6 +110,7 @@ def load_csv(csv_file_path,table_name,database='power_outage'):
     for line_data in res:
         counter+=1
         print(line_data)
+        #insert data into database table by line
         data_sql = 'insert into '+ table_name + ' value(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cur.execute(data_sql, line_data)
     print(counter)
@@ -145,6 +118,7 @@ def load_csv(csv_file_path,table_name,database='power_outage'):
     cur.close()
     file.close()
 
+#update database table from given model out put cvs file with format cousubfp|outage ratio
 def update_database(csv_file_path = 'C:/Users/15801/Desktop/Poweroutage_Prediction_Web/data/outage_predictions.csv', table_name = 'city_info'):
     file = open(csv_file_path, 'r',encoding='utf-8')
     reader = file.readline()
@@ -156,14 +130,15 @@ def update_database(csv_file_path = 'C:/Users/15801/Desktop/Poweroutage_Predicti
     cur.fetchone()
     cur.close()
     file.close()
-
+    
+#reset database table's outage to 0
 def reset_datebase(table_name = 'city_info'):
     data_sql = 'update ' +  table_name + ' set outage = 0'
     cur.execute(data_sql)
     cur.fetchone()
     cur.close()
 
-update_database()
-#load_csv('C:/Users/15801/Desktop/Poweroutage_Prediction_Web/data/city_info.csv', "city_info")
+
+load_csv('C:/Users/15801/Desktop/Poweroutage_Prediction_Web/data/city_info.csv', "city_info")
 #shp_to_GeoJson("shapefile//tl_2021_36_cousub.zip", "backend/tl_2021_36_cousub.json")
 

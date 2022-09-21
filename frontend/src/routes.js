@@ -78,18 +78,14 @@ const handleRoute = async (req, res) => {
         return new SuccessModel('');
     }
     else if(req.path === '/city_outage'){
-        console.log('hiiii')
         res.writeHead(200,{"Content-Type":"application/javascript"})
         const p = await method.getoutage(req.query.FP);
-        console.log(p);
         res.end(p);
         return new SuccessModel(p);
     }
     else if(req.path === '/state_outage'){
-        console.log('hiiii')
         res.writeHead(200,{"Content-Type":"application/javascript"})
         const p = await method.getstateoutage(req.query.FP);
-        console.log(p);
         res.end(p);
         return new SuccessModel(p);
     }

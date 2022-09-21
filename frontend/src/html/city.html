@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <style>
-    @import url(city_style.css);
+    @import url(style.css);
     @import url(form.css);
 </style>
 
@@ -25,6 +25,7 @@
                 <script>
                     var loc=location.href;
                     var length = loc.length;
+                    //set current state FP and longtitude and latitude from js file us.js
                     window.st_num = decodeURI(loc.substring(loc.indexOf('=') + 1, length));
                     window.latitude = 32.707;
                     window.longtitude = -86.693;
@@ -54,27 +55,7 @@
                                 info.update(layer.feature.properties);
                             };
 
-                    function resetHighlight(e) {
-                        geojson.resetStyle(e.target);
-                        info.update();
-                    };
-
-                    function sort_object(obj) {
-                        items = Object.keys(obj).map(function(key) {
-                            return [key, obj[key]];
-                        });
-                        items.sort(function(first, second) {
-                            return second[1] - first[1];
-                        });
-                        sorted_obj={}
-                        $.each(items, function(k, v) {
-                            use_key = v[0]
-                            use_value = v[1]
-                            sorted_obj[use_key] = use_value
-                        })
-                        return(sorted_obj)
-                    } 
-
+                    //fetch API request to get city geo info from json file
                     var citydata = fetch('city_data?FP=' + st_num, {
                     method: 'POST',
                     headers: {
@@ -82,6 +63,7 @@
                     },
                     //body: new URLSearchParams(data),
                     }).then(result=>result.json());
+                    //fetch API request to get city outage info from database 
                     var cityoutage = fetch('city_outage?FP=' + st_num, {
                     method: 'POST',
                     headers: {
@@ -90,13 +72,15 @@
                     //body: new URLSearchParams(data),
                     }).then(result=>result.json());
 
+                    //get result from both promise
                     Promise.all([citydata, cityoutage]).then(((res)=>{
-                            city_info = res[0]
-                            city_outage = res[1]
+                            [city_info, city_outage] = res
+                            //dictionary with city fp as key outage as val
                             outage_dict = {}
                             for (const element in city_outage){
                                 outage_dict[city_outage[element].cousubfp.toString()] = city_outage[element].outage
                             }   
+                            //city map style and color
                             function style(feature) {
                                 return {
                                 fillColor: getColor(outage_dict[feature.properties.COUSUBFP]),
@@ -115,14 +99,15 @@
                                 this.update();
                                 return this._div;
                             };
-                            // method that we will use to update the control based on feature properties passed
+                            // update legend info based on feature properties
                             info.update = function (props, outage = outage_dict) {
                                 this._div.innerHTML = '<h4>Power Outage:</h4>' +  (props ?
-                                    '<b>' + props.NAME + '</b><br />' + 'Ratio: ' + outage[props.COUSUBFP]
+                                    '<b>' + props.NAME + '</b><br />' + 'Ratio: ' + parseFloat(outage[props.COUSUBFP]*100).toFixed(1) + '%'
                                     : 'Select a city');
                             };
                             info.addTo(map);
-
+                            
+                            //set up legend
                             var legend = L.control({position: 'bottomright'});
                             legend.onAdd = function (map) {
                                 var div = L.DomUtil.create('div', 'info legend'),
@@ -140,7 +125,6 @@
                     })).catch((err) => {
                         console.log(err)
                     }); // connection errors
-                    outage_dict = {name:'brooklyn'}
                 </script>
                 <div id="map">
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
@@ -198,14 +182,15 @@
                 <a
                     href="https://www2.census.gov/geo/tiger/TIGER2021/COUSUB/">https://www2.census.gov/geo/tiger/TIGER2021/COUSUB/</a>, City data from United States Census Bureau
                 <br>
+                <a
+                    href="https://ieeexplore.ieee.org/document/8501906">https://ieeexplore.ieee.org/document/8501906</a>, Model Based
+                <br>
         </div>
     </section>
 </html>
 
 
 <script>
-    
-    //todo implement data
     cityoutage.then(city_outage => {
         outage_dict = {}
         outage_arrange  = []
@@ -220,12 +205,12 @@
                 chartDom.style.width = window.innerWidth*0.5+'px';
                 chartDom.style.height = window.innerHeight*0.5+'px';
             };
-            //设置div容器高宽
+            //set div container height
             resizeMainContainer();
-            // 初始化图表
+            //initialize form
             var mainChart = echarts.init(chartDom, 'dark');
             $(window).on('resize',function(){//
-                //屏幕大小自适应，重置容器高宽
+                //based on screen size reset form height
                 resizeMainContainer();
                 mainChart.resize();
             });
@@ -268,7 +253,7 @@
             };
             option && myChart.setOption(option);
         })
-        //form header
+        //data form
         var tbody = document.getElementById('tbMain');
 	    for(var i = 0;i < city_outage.length; i+=2){ 
             if (i+1 < city_outage.length){
@@ -281,47 +266,4 @@
             }
 		}
     })
-	  
-    function getDataRow(counter,h1,h2 = null){
-        var row = document.createElement('tr'); 
-        
-        var idCell = document.createElement('td'); 
-        idCell.innerHTML = counter + 1; 
-        row.appendChild(idCell); 
-        
-        var nameCell = document.createElement('td');
-        nameCell.innerHTML = h1.name;
-        row.appendChild(nameCell);
-        
-        var jobCell = document.createElement('td');
-        jobCell.innerHTML = parseFloat(h1.outage*100).toFixed(1) + '%';
-        row.appendChild(jobCell);
-        if (h2!=null){
-            var idCell = document.createElement('td'); 
-            idCell.innerHTML = counter + 2; 
-            row.appendChild(idCell); 
-            
-            var nameCell = document.createElement('td');
-            nameCell.innerHTML = h2.name;
-            row.appendChild(nameCell);
-            
-            var jobCell = document.createElement('td');
-            jobCell.innerHTML = parseFloat(h2.outage*100).toFixed(1) + '%';
-            row.appendChild(jobCell);
-        }
-        else{
-            var idCell = document.createElement('td'); 
-            idCell.innerHTML = counter + 2; 
-            row.appendChild(idCell); 
-            
-            var nameCell = document.createElement('td');
-            nameCell.innerHTML = '-';
-            row.appendChild(nameCell);
-            
-            var jobCell = document.createElement('td');
-            jobCell.innerHTML = '-';
-            row.appendChild(jobCell);
-        }
-        return row;
-    }
 </script>

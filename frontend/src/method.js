@@ -1,6 +1,7 @@
 const fs = require("fs")
 const mysql = require('mysql');
 
+//initialize db
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -10,6 +11,7 @@ const db = mysql.createConnection({
 });
 db.connect();
 
+//get json file by imported filename
 function getFileContent(filename){
     const promise = new Promise((resolve,reject)=>{
         const fullFilename = 'C:/Users/15801/Desktop/Poweroutage_Prediction_Web/shapefile/state_json/'+filename+'.json';
@@ -27,6 +29,7 @@ function getFileContent(filename){
     return promise;
 }
 
+//get city fp, city name and outage from db
 function getoutage(st_num){
     const promise = new Promise((resolve, reject)=>{
         const sql = "select cousubfp, name, outage from city_info where statefp = ?";
@@ -35,7 +38,6 @@ function getoutage(st_num){
                 reject(err);
                 resolve('error');
             }else{
-                console.log(data);
                 resolve(JSON.stringify(data));
             }
         });
@@ -43,6 +45,7 @@ function getoutage(st_num){
     return promise;
 }
 
+//get state fp, outage and state fips from db
 function getstateoutage(st_num){
     const promise = new Promise((resolve, reject)=>{
         const sql = "select data.statefp, data.outage, us_state_fips.state from (select statefp, sum(outage) as outage from city_info group by statefp) as data join us_state_fips on us_state_fips.sfips = data.statefp";
@@ -51,7 +54,6 @@ function getstateoutage(st_num){
                 reject(err);
                 resolve('error');
             }else{
-                console.log(data);
                 resolve(JSON.stringify(data));
             }
         });
@@ -60,5 +62,5 @@ function getstateoutage(st_num){
 }
 
 
-//getFileContent('a.json').then((data)=>{})
+//export methods
 module.exports = {getFileContent, getoutage, getstateoutage}
