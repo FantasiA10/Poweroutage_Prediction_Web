@@ -8,6 +8,7 @@ import json
 from json import dumps
 import csv
 
+
 #database setup for local host
 db = pymysql.connect(
          host='localhost',
@@ -139,6 +140,10 @@ def reset_datebase(table_name = 'city_info'):
     cur.close()
 
 
-load_csv('C:/Users/15801/Desktop/Poweroutage_Prediction_Web/data/city_info.csv', "city_info")
-#shp_to_GeoJson("shapefile//tl_2021_36_cousub.zip", "backend/tl_2021_36_cousub.json")
+def main():
+    City_Info_Dir = os.path.abspath(os.path.join(os.getcwd(), ".."))+'\data\city_info.csv'
+    load_csv(City_Info_Dir, "city_info")
+    #shp_to_GeoJson("shapefile//tl_2021_36_cousub.zip", "backend/tl_2021_36_cousub.json")
+
+main()
 
