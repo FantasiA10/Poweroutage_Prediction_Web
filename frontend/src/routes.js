@@ -1,8 +1,8 @@
-const {SuccessMode, SuccessModel} = require('./frontend/responseModel');
-const {getList} = require('./frontend/method');
+const {SuccessMode, SuccessModel} = require('./responseModel');
+const {getList} = require('./method');
 const querystring = require('querystring');
 const fs = require('fs');
-const method = require("./frontend/src/method");
+const method = require("./src/method");
 const { ContextExclusionPlugin } = require('webpack');
 const { platform } = require('os');
 
