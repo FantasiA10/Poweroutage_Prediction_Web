@@ -21,7 +21,7 @@ const handleRoute = async (req, res) => {
         })
         return new SuccessModel('');
     }
-    else if(url === '/state'){
+    else if(url === '/state' || url === '/'){
         res.writeHead(200, {"Content-Type": "text/html"});
         fs.readFile("src/html/state.html", "utf-8", function (error, data){
             if(error)
