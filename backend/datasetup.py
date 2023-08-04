@@ -11,11 +11,11 @@ import csv
 
 #database setup for local host
 db = pymysql.connect(
-         host='localhost',
+         host='sql9.freesqldatabase.com',
          port=3306,
-         user='root',
-         passwd='',
-         db ='data',
+         user='sql9637430',
+         passwd='VCi5btnBJm',
+         db ='sql9637430',
          charset='utf8'
          )
 cur = db.cursor()
@@ -92,13 +92,13 @@ def folder_json_to_csv():
     return city_info_lst, header
 
 #create database table from given cvs file
-def load_csv(csv_file_path,table_name,database='power_outage'):
+def load_csv(csv_file_path,table_name,database='sql9637430'):
     file = open(csv_file_path, 'r',encoding='utf-8')
     reader = file.readline()
     b = reader.split(',')
     colum = ''
     for a in b:
-        colum = colum + a.strip('"').strip('"') + ' varchar(255),'
+        colum = colum + a.strip('"').strip("\n").strip('"') + ' varchar(255),'
     colum = colum[:-1]
     #insert headers into databse
     create_sql = 'create table if not exists ' + table_name + ' ' + '(' + colum + ')' + ' DEFAULT CHARSET=utf8'

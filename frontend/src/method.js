@@ -3,11 +3,11 @@ const mysql = require('mysql');
 
 //initialize db
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
+    host: 'sql9.freesqldatabase.com',
+    user: 'sql9637430',
+    password: 'VCi5btnBJm',
     port:'3306',
-    database: 'power_outage'
+    database: 'sql9637430'
 });
 db.connect();
 
