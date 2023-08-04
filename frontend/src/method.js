@@ -14,7 +14,7 @@ db.connect();
 //get json file by imported filename
 function getFileContent(filename){
     const promise = new Promise((resolve,reject)=>{
-        const fullFilename = 'C:/Users/15801/Desktop/Poweroutage_Prediction_Web/shapefile/state_json/'+filename+'.json';
+        const fullFilename = 'shapefile/state_json/'+filename+'.json';
         console.log('reading file')
         fs.readFile(fullFilename, (err,data)=>{
             if (err){

@@ -33,7 +33,7 @@ const handleRoute = async (req, res) => {
     }
     else if(req.path === '/city'){
         res.writeHead(200, {"Content-Type": "text/html"});
-        fs.readFile("src/html/city.html", "utf-8", function (error, data){
+        fs.readFile("frontend/src/html/city.html", "utf-8", function (error, data){
             if(error)
                 res.end("read html file error.");
             else
@@ -43,7 +43,7 @@ const handleRoute = async (req, res) => {
     }
     else if(url === '/state_setup.js'){
         res.writeHead(200,{"Content-Type":"application/javascript"})
-        fs.readFile('src/js/state_setup.js','utf-8',(error,data)=>{
+        fs.readFile('frontend/src/js/state_setup.js','utf-8',(error,data)=>{
             if(error)
                 res.end("read js file error.");
             else
@@ -53,7 +53,7 @@ const handleRoute = async (req, res) => {
     }
     else if(req.path === '/city_setup.js'){
         res.writeHead(200,{"Content-Type":"application/javascript"});
-        fs.readFile('src/js/city_setup.js','utf-8',(error,data)=>{
+        fs.readFile('frontend/src/js/city_setup.js','utf-8',(error,data)=>{
             if(error)
                 res.end("read js file error.");
             else
@@ -69,7 +69,7 @@ const handleRoute = async (req, res) => {
     }
     else if(req.path === '/state_data'){
         res.writeHead(200,{"Content-Type":"application/javascript"})
-        fs.readFile('../shapefile/US.js','utf-8',(error,data)=>{
+        fs.readFile('shapefile/US.js','utf-8',(error,data)=>{
             if(error)
                 res.end("read js file error.");
             else
