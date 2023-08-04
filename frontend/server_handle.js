@@ -1,8 +1,8 @@
-const handleRoute = require('./src/routes');
+const handleRoute = require('./routes');
 const querystring = require('querystring');
 const http = require('http');
 const fs = require('fs');
-const method = require('./src/method');
+const method = require('./method');
 
 const serverHandler = (req, res) =>{
     const url = req.url;
