@@ -15,7 +15,7 @@ db = pymysql.connect(
          port=3306,
          user='root',
          passwd='',
-         db ='power_outage',
+         db ='data',
          charset='utf8'
          )
 cur = db.cursor()
@@ -98,10 +98,11 @@ def load_csv(csv_file_path,table_name,database='power_outage'):
     b = reader.split(',')
     colum = ''
     for a in b:
-        colum = colum + a + ' varchar(255),'
+        colum = colum + a.strip('"').strip('"') + ' varchar(255),'
     colum = colum[:-1]
     #insert headers into databse
     create_sql = 'create table if not exists ' + table_name + ' ' + '(' + colum + ')' + ' DEFAULT CHARSET=utf8'
+    print(create_sql)
     cur.execute('use %s' % database)
     cur.execute('SET NAMES utf8;')
     cur.execute('SET character_set_connection=utf8;')
