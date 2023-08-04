@@ -1,8 +1,8 @@
-const {SuccessMode, SuccessModel} = require('./responseModel');
-const {getList} = require('./method');
+const {SuccessMode, SuccessModel} = require('./frontend/responseModel');
+const {getList} = require('./frontend/method');
 const querystring = require('querystring');
 const fs = require('fs');
-const method = require("./method");
+const method = require("./frontend/src/method");
 const { ContextExclusionPlugin } = require('webpack');
 const { platform } = require('os');
 
@@ -13,7 +13,7 @@ const handleRoute = async (req, res) => {
     console.log(url)
     if(url.split('.')[1] === 'css'){
         res.writeHead(200,{"Content-Type":"Text/css"})
-        fs.readFile('src/css'+url,'utf-8',(error,data)=>{
+        fs.readFile('frontend/src/css'+url,'utf-8',(error,data)=>{
             if(error)
                 res.end("read css file error.");
             else
@@ -69,7 +69,7 @@ const handleRoute = async (req, res) => {
     }
     else if(req.path === '/state_data'){
         res.writeHead(200,{"Content-Type":"application/javascript"})
-        fs.readFile('shapefile/US.js','utf-8',(error,data)=>{
+        fs.readFile('shapefile/us.js','utf-8',(error,data)=>{
             if(error)
                 res.end("read js file error.");
             else
