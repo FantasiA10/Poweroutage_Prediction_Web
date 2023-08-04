@@ -1,0 +1,35 @@
+{
+  "name": "poweroutage_prediction_web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FantasiA10/Poweroutage_Prediction_Web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FantasiA10/Poweroutage_Prediction_Web/issues"
+  },
+  "homepage": "https://github.com/FantasiA10/Poweroutage_Prediction_Web#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "browserify": "^17.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "echart": "^0.1.3",
+    "express": "^4.18.1",
+    "mysql": "^2.18.1",
+    "shpjs": "^4.0.2",
+    "webpack": "^5.73.0"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
