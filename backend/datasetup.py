@@ -115,6 +115,7 @@ def load_csv(csv_file_path,table_name,database='sql9637430'):
         #insert data into database table by line
         data_sql = 'insert into '+ table_name + ' value(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cur.execute(data_sql, line_data)
+    db.commit()
     print(counter)
     cur.fetchone()
     cur.close()
