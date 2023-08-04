@@ -2,7 +2,7 @@ const {SuccessMode, SuccessModel} = require('./responseModel');
 const {getList} = require('./method');
 const querystring = require('querystring');
 const fs = require('fs');
-const method = require("./src/method");
+const method = require("./method");
 const { ContextExclusionPlugin } = require('webpack');
 const { platform } = require('os');
 
